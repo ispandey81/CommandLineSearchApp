@@ -43,7 +43,7 @@ public class User {
         this.created_at = created_at;
     }
 
-    public boolean getVerified() {
+    public boolean isVerified() {
         return verified;
     }
 
