@@ -30,7 +30,7 @@ public class Util {
     private static final String TERMINATE_PROGRAM_KEYWORD = "quit";
 
     public static void printFormattedText(String text) {
-        System.out.format("%s", text);
+        System.out.printf(text);
     }
 
     public static String readFile(String fileName) throws IOException
