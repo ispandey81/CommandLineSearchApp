@@ -1,3 +1,5 @@
+package utils;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.SearchException;
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 
 public class Util {
 
-    public static final String[] searchOptionsRequiringConversion = {"created_at", "verified", "assignee_id"};
+    private Util() { throw new IllegalStateException("Utility class"); }
 
-    private static final String terminateProgramKeyword = "quit";
+    private static final String[] SEARCH_OPERATIONS_REQUIRING_CONVERSION = {"created_at", "verified", "assignee_id"};
+
+    private static final String TERMINATE_PROGRAM_KEYWORD = "quit";
 
     public static void printFormattedText(String text) {
         System.out.format("%s", text);
@@ -46,7 +50,7 @@ public class Util {
     }
 
     public static boolean quitToExit(String inputToCheck) {
-        return inputToCheck.equals(terminateProgramKeyword);
+        return inputToCheck.equals(TERMINATE_PROGRAM_KEYWORD);
     }
 
     public static void search(Scanner scanner, String userInput, String fileName) {
@@ -69,12 +73,12 @@ public class Util {
             } else if (fileName.endsWith("tickets.json")) {
                 searchingUsersOrTickets = "tickets";
             }
-            System.out.printf("Searching %s for '%s' with a value of '%s' \n", searchingUsersOrTickets, searchTerm, searchValue);
+            System.out.printf("Searching %s for '%s' with a value of '%s' %n", searchingUsersOrTickets, searchTerm, searchValue);
             List<Object> responseList = findUsersOrTickets(searchTerm, searchValue, fileName, searchingUsersOrTickets);
             if (responseList.isEmpty()) {
                 System.out.println("No results found");
             } else {
-                System.out.format("%d result(s) found\n", responseList.size());
+                System.out.format("%d result(s) found%n", responseList.size());
                 responseList.stream().forEach(object -> System.out.format("%s", object.toString()));
             }
         } catch (SearchException e) {
@@ -90,63 +94,55 @@ public class Util {
         if (Objects.isNull(searchTerm) || Objects.isNull(searchValue) || Objects.isNull(fileToSearchFrom)) {
             throw new SearchException("searchTerm or searchValue or fileToSearchFrom is null");
         }
-        List<Object> foundItems = new ArrayList<Object>();
-        Set<User> users = new HashSet<User>();
-        Set<Ticket> tickets = new HashSet<Ticket>();
+        List<Object> foundItems = new ArrayList<>();
+        Set<User> users = new HashSet<>();
+        Set<Ticket> tickets = new HashSet<>();
         try {
             String fileContent = readFile(fileToSearchFrom);
             ObjectMapper objectMapper = new ObjectMapper();
 
             Object convertedObject = convertSearchValue(searchTerm, searchValue);
-            Predicate<User> userPredicate = new Predicate<User>()
-            {
-                @Override
-                public boolean test(User user) {
-                    boolean testPassed = false;
-                    try {
-                        Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, User.class));
-                        if (method.invoke(user) != null && method.invoke(user).equals(convertedObject)) {
-                            testPassed = true;
-                        }
-                    } catch (IntrospectionException e) {
-                        e.printStackTrace();
-                        System.exit(0);
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                        System.exit(0);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                        System.exit(0);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            Predicate<User> userPredicate = user -> {
+                boolean testPassed = false;
+                try {
+                    Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, User.class));
+                    if (method.invoke(user) != null && method.invoke(user).equals(convertedObject)) {
+                        testPassed = true;
                     }
-                    return testPassed;
+                } catch (IntrospectionException e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                return testPassed;
             };
-            Predicate<Ticket> ticketPredicate = new Predicate<Ticket>()
-            {
-                @Override
-                public boolean test(Ticket ticket) {
-                    boolean testPassed = false;
-                    try {
-                        Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, Ticket.class));
-                        if (method.invoke(ticket) != null && (method.invoke(ticket).equals(convertedObject) || (method.invoke(ticket) instanceof Collection && new ArrayList<>((Collection<?>)method.invoke(ticket)).contains(convertedObject) ))) {
-                            testPassed = true;
-                        }
-                    } catch (IntrospectionException e) {
-                        e.printStackTrace();
-                        System.exit(0);
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                        System.exit(0);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                        System.exit(0);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+            Predicate<Ticket> ticketPredicate = ticket -> {
+                boolean testPassed = false;
+                try {
+                    Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, Ticket.class));
+                    if (method.invoke(ticket) != null && (method.invoke(ticket).equals(convertedObject) || (method.invoke(ticket) instanceof Collection && new ArrayList<>((Collection<?>)method.invoke(ticket)).contains(convertedObject) ))) {
+                        testPassed = true;
                     }
-                    return testPassed;
+                } catch (IntrospectionException e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                return testPassed;
             };
             if (searchingUsersOrTickets.equals("users")) {
                 users = objectMapper.readValue(fileContent, new TypeReference<HashSet<User>>() {
@@ -171,7 +167,7 @@ public class Util {
             throw new SearchException("searchTerm or searchValue is null");
         } else {
             try {
-                boolean validSearchTerm = Arrays.stream(searchOptionsRequiringConversion).anyMatch(s -> s.equals(searchTerm));
+                boolean validSearchTerm = Arrays.stream(SEARCH_OPERATIONS_REQUIRING_CONVERSION).anyMatch(s -> s.equals(searchTerm));
                 if (validSearchTerm) {
                     switch (searchTerm) {
                         case "verified":
