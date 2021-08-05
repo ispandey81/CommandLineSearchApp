@@ -111,13 +111,10 @@ public class Util {
                     }
                 } catch (IntrospectionException e) {
                     e.printStackTrace();
-                    System.exit(0);
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
-                    System.exit(0);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
-                    System.exit(0);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -132,13 +129,10 @@ public class Util {
                     }
                 } catch (IntrospectionException e) {
                     e.printStackTrace();
-                    System.exit(0);
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
-                    System.exit(0);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
-                    System.exit(0);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
