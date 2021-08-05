@@ -12,6 +12,9 @@ public class Ticket {
     private int assignee_id;
     private List<String> tags;
 
+    public Ticket() {
+    }
+
     public Ticket(String _id, Date created_at, String type, String subject, int assignee_id, List<String> tags) {
         this._id = _id;
         this.created_at = created_at;
@@ -84,13 +87,11 @@ public class Ticket {
 
     @Override
     public String toString() {
-        return "Ticket{" +
-                "_id='" + _id + '\'' +
-                ", created_at=" + created_at +
-                ", type='" + type + '\'' +
-                ", subject='" + subject + '\'' +
-                ", assignee_id=" + assignee_id +
-                ", tags=" + tags +
-                '}';
+        return  "===============================================\n_id = " + _id +
+                "\ncreated_at = " + created_at +
+                "\ntype = " + type +
+                "\nsubject = " + subject +
+                "\nassignee_id = " + assignee_id +
+                "\ntags = " + tags + "\n";
     }
 }

@@ -3,6 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.SearchException;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.IOUtils;
+import pojo.Ticket;
 import pojo.User;
 
 import java.beans.IntrospectionException;
@@ -22,8 +23,10 @@ public class Util {
 
     public static final String[] searchOptionsRequiringConversion = {"created_at", "verified", "assignee_id"};
 
-    public static void printHelp(String helpText) {
-        System.out.format("%s", helpText);
+    private static final String terminateProgramKeyword = "quit";
+
+    public static void printFormattedText(String text) {
+        System.out.format("%s", text);
     }
 
     public static String readFile(String fileName) throws IOException
@@ -36,29 +39,73 @@ public class Util {
             result = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return result;
     }
 
-    public static List<User> findUser(String searchTerm, String searchValue, String fileToSearchFrom) throws SearchException {
+    public static boolean quitToExit(String inputToCheck) {
+        return inputToCheck.equals(terminateProgramKeyword);
+    }
+
+    public static void search(Scanner scanner, String userInput, String fileName) {
+        String searchingUsersOrTickets = null;
+        try {
+            System.out.println("Enter search term");
+            userInput = scanner.nextLine();
+            if (Util.quitToExit(userInput)) {
+                System.exit(0);
+            }
+            String searchTerm = userInput;
+            System.out.println("Enter search value");
+            userInput = scanner.nextLine();
+            if (Util.quitToExit(userInput)) {
+                System.exit(0);
+            }
+            String searchValue = userInput;
+            if (fileName.endsWith("users.json")) {
+                searchingUsersOrTickets = "users";
+            } else if (fileName.endsWith("tickets.json")) {
+                searchingUsersOrTickets = "tickets";
+            }
+            System.out.printf("Searching %s for '%s' with a value of '%s' \n", searchingUsersOrTickets, searchTerm, searchValue);
+            List<Object> responseList = findUsersOrTickets(searchTerm, searchValue, fileName, searchingUsersOrTickets);
+            if (responseList.isEmpty()) {
+                System.out.println("No results found");
+            } else {
+                System.out.format("%d result(s) found\n", responseList.size());
+                responseList.stream().forEach(object -> System.out.format("%s", object.toString()));
+            }
+        } catch (SearchException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public static List<Object> findUsersOrTickets(String searchTerm, String searchValue, String fileToSearchFrom, String searchingUsersOrTickets) throws SearchException {
         if (Objects.isNull(searchTerm) || Objects.isNull(searchValue) || Objects.isNull(fileToSearchFrom)) {
             throw new SearchException("searchTerm or searchValue or fileToSearchFrom is null");
         }
-        List<User> foundUsers = new ArrayList<User>();
+        List<Object> foundItems = new ArrayList<Object>();
+        Set<User> users = new HashSet<User>();
+        Set<Ticket> tickets = new HashSet<Ticket>();
         try {
             String fileContent = readFile(fileToSearchFrom);
             ObjectMapper objectMapper = new ObjectMapper();
-            Set<User> users = objectMapper.readValue(fileContent, new TypeReference<HashSet<User>>() {
-            });
+
             Object convertedObject = convertSearchValue(searchTerm, searchValue);
-            Predicate<User> condition = new Predicate<User>()
+            Predicate<User> userPredicate = new Predicate<User>()
             {
                 @Override
                 public boolean test(User user) {
                     boolean testPassed = false;
                     try {
                         Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, User.class));
-                        if (method.invoke(user).equals(convertedObject)) {
+                        if (method.invoke(user) != null && method.invoke(user).equals(convertedObject)) {
                             testPassed = true;
                         }
                     } catch (IntrospectionException e) {
@@ -70,15 +117,53 @@ public class Util {
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                         System.exit(0);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     return testPassed;
                 }
             };
-            foundUsers = users.stream().filter(condition).collect(Collectors.toList());
+            Predicate<Ticket> ticketPredicate = new Predicate<Ticket>()
+            {
+                @Override
+                public boolean test(Ticket ticket) {
+                    boolean testPassed = false;
+                    try {
+                        Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, Ticket.class));
+                        if (method.invoke(ticket) != null && (method.invoke(ticket).equals(convertedObject) || (method.invoke(ticket) instanceof Collection && new ArrayList<>((Collection<?>)method.invoke(ticket)).contains(convertedObject) ))) {
+                            testPassed = true;
+                        }
+                    } catch (IntrospectionException e) {
+                        e.printStackTrace();
+                        System.exit(0);
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                        System.exit(0);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        System.exit(0);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return testPassed;
+                }
+            };
+            if (searchingUsersOrTickets.equals("users")) {
+                users = objectMapper.readValue(fileContent, new TypeReference<HashSet<User>>() {
+                });
+                foundItems = users.stream().filter(userPredicate).collect(Collectors.toList());
+            } else if (searchingUsersOrTickets.equals("tickets")) {
+                tickets = objectMapper.readValue(fileContent, new TypeReference<HashSet<Ticket>>() {
+                });
+                foundItems = tickets.stream().filter(ticketPredicate).collect(Collectors.toList());
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return foundUsers;
+        return foundItems;
     }
 
     private static Object convertSearchValue(String searchTerm, String searchValue) throws SearchException {
@@ -102,6 +187,8 @@ public class Util {
                     }
                 }
             } catch (ParseException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

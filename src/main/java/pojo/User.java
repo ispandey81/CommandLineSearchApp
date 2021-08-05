@@ -66,8 +66,8 @@ public class User {
 
     @Override
     public String toString() {
-        return  "===============================================\n_id = '" + _id + '\'' +
-                "\nname = '" + name + '\'' +
+        return  "===============================================\n_id = " + _id +
+                "\nname = " + name +
                 "\ncreated_at = " + created_at +
                 "\nverified = " + verified + "\n";
     }
