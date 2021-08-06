@@ -53,8 +53,7 @@ public class Util {
         return inputToCheck.equals(TERMINATE_PROGRAM_KEYWORD);
     }
 
-    public static void search(Scanner scanner, String userInput, String fileName) {
-        String searchingUsersOrTickets = null;
+    public static void search(Scanner scanner, String userInput, String usersFileName, String ticketsFileName, String searchingUsersOrTickets) {
         try {
             System.out.println("Enter search term");
             userInput = scanner.nextLine();
@@ -68,13 +67,8 @@ public class Util {
                 System.exit(0);
             }
             String searchValue = userInput;
-            if (fileName.endsWith("users.json")) {
-                searchingUsersOrTickets = "users";
-            } else if (fileName.endsWith("tickets.json")) {
-                searchingUsersOrTickets = "tickets";
-            }
             System.out.printf("Searching %s for '%s' with a value of '%s' %n", searchingUsersOrTickets, searchTerm, searchValue);
-            List<Object> responseList = findUsersOrTickets(searchTerm, searchValue, fileName, searchingUsersOrTickets);
+            List<Object> responseList = findUsersOrTickets(searchTerm, searchValue, usersFileName, ticketsFileName, searchingUsersOrTickets);
             if (responseList.isEmpty()) {
                 System.out.println("No results found");
             } else {
@@ -90,15 +84,16 @@ public class Util {
     }
 
 
-    public static List<Object> findUsersOrTickets(String searchTerm, String searchValue, String fileToSearchFrom, String searchingUsersOrTickets) throws SearchException {
-        if (Objects.isNull(searchTerm) || Objects.isNull(searchValue) || Objects.isNull(fileToSearchFrom)) {
+    public static List<Object> findUsersOrTickets(String searchTerm, String searchValue, String usersFileName, String ticketsFileName, String searchingUsersOrTickets) throws SearchException {
+        if (Objects.isNull(searchTerm) || Objects.isNull(searchValue)) {
             throw new SearchException("searchTerm or searchValue or fileToSearchFrom is null");
         }
         List<Object> foundItems = new ArrayList<>();
-        Set<User> users = new HashSet<>();
-        Set<Ticket> tickets = new HashSet<>();
+        Set<User> users;
+        Set<Ticket> tickets;
         try {
-            String fileContent = readFile(fileToSearchFrom);
+            String usersFileContent = readFile(usersFileName);
+            String ticketsFileContent = readFile(ticketsFileName);
             ObjectMapper objectMapper = new ObjectMapper();
 
             Object convertedObject = convertSearchValue(searchTerm, searchValue);
@@ -138,13 +133,19 @@ public class Util {
                 }
                 return testPassed;
             };
+            users = objectMapper.readValue(usersFileContent, new TypeReference<HashSet<User>>() {
+            });
+            tickets = objectMapper.readValue(ticketsFileContent, new TypeReference<HashSet<Ticket>>() {
+            });
             if (searchingUsersOrTickets.equals("users")) {
-                users = objectMapper.readValue(fileContent, new TypeReference<HashSet<User>>() {
-                });
                 foundItems = users.stream().filter(userPredicate).collect(Collectors.toList());
+                List<User> xyz =foundItems.stream().map(User.class::cast).collect(Collectors.toList());
+                List<String> assignedTickets = tickets.stream()
+                        .filter(ticket -> xyz.stream().anyMatch(user -> Integer.parseInt(user.get_id()) == ticket.getAssignee_id()))
+                        .map(ticket -> ticket.getSubject())
+                        .collect(Collectors.toList());
+                System.out.println(assignedTickets);
             } else if (searchingUsersOrTickets.equals("tickets")) {
-                tickets = objectMapper.readValue(fileContent, new TypeReference<HashSet<Ticket>>() {
-                });
                 foundItems = tickets.stream().filter(ticketPredicate).collect(Collectors.toList());
             }
 
