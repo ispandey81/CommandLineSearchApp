@@ -124,7 +124,7 @@ public class Util {
                 boolean testPassed = false;
                 try {
                     Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, Ticket.class));
-                    if (method.invoke(ticket) != null && (method.invoke(ticket).equals(convertedObject) || (method.invoke(ticket) instanceof Collection && new ArrayList<>((Collection<?>)method.invoke(ticket)).contains(convertedObject) ))) {
+                    if (Objects.equals(method.invoke(ticket), convertedObject) || (method.invoke(ticket) instanceof Collection && new ArrayList<>((Collection<?>)method.invoke(ticket)).contains(convertedObject) )) {
                         testPassed = true;
                     }
                 } catch (IntrospectionException e) {
@@ -162,7 +162,7 @@ public class Util {
         } else {
             try {
                 boolean validSearchTerm = Arrays.stream(SEARCH_OPERATIONS_REQUIRING_CONVERSION).anyMatch(s -> s.equals(searchTerm));
-                if (validSearchTerm) {
+                if (validSearchTerm && !Objects.equals(searchValue, "null")) {
                     switch (searchTerm) {
                         case "verified":
                             return Boolean.parseBoolean(searchValue);
@@ -175,6 +175,8 @@ public class Util {
                         default:
                             return searchValue;
                     }
+                } else if(Objects.equals(searchValue, "null")) {
+                    return null;
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
