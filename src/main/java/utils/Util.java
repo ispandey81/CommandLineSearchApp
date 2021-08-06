@@ -147,6 +147,13 @@ public class Util {
                 System.out.println(assignedTickets);
             } else if (searchingUsersOrTickets.equals("tickets")) {
                 foundItems = tickets.stream().filter(ticketPredicate).collect(Collectors.toList());
+                List<Ticket> xyz =foundItems.stream().map(Ticket.class::cast).collect(Collectors.toList());
+                String assignedUser = users.stream()
+                        .filter(user -> xyz.stream().anyMatch(ticket -> Integer.parseInt(user.get_id()) == ticket.getAssignee_id()))
+                        .map(user -> user.getName())
+                        .reduce("", (partialString, element) -> partialString + element);
+                System.out.println(assignedUser);
+
             }
 
         } catch (IOException e) {
