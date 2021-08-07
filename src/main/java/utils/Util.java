@@ -68,12 +68,23 @@ public class Util {
             }
             String searchValue = userInput;
             System.out.printf("Searching %s for '%s' with a value of '%s' %n", searchingUsersOrTickets, searchTerm, searchValue);
-            List<Object> responseList = findUsersOrTickets(searchTerm, searchValue, usersFileName, ticketsFileName, searchingUsersOrTickets);
+            Map<User, List<String>> responseList = findUsers(searchTerm, searchValue, usersFileName, ticketsFileName, searchingUsersOrTickets);
+            Map<Ticket, String> ticketsResponseList = findTickets(searchTerm, searchValue, usersFileName, ticketsFileName, searchingUsersOrTickets);
             if (responseList.isEmpty()) {
                 System.out.println("No results found");
             } else {
                 System.out.format("%d result(s) found%n", responseList.size());
-                responseList.stream().forEach(object -> System.out.format("%s", object.toString()));
+                for (Map.Entry<User,List<String>> entry : responseList.entrySet()) {
+                    System.out.printf(entry.getKey() + "tickets = " + entry.getValue() + "%n");
+                }
+            }
+            if (ticketsResponseList.isEmpty()) {
+                System.out.println("No results found");
+            } else {
+                System.out.format("%d result(s) found%n", ticketsResponseList.size());
+                for (Map.Entry<Ticket, String> entry : ticketsResponseList.entrySet()) {
+                    System.out.printf(entry.getKey() + "assignee_name = " + entry.getValue() + "%n");
+                }
             }
         } catch (SearchException e) {
             e.printStackTrace();
@@ -83,12 +94,72 @@ public class Util {
 
     }
 
-
-    public static List<Object> findUsersOrTickets(String searchTerm, String searchValue, String usersFileName, String ticketsFileName, String searchingUsersOrTickets) throws SearchException {
+    public static Map<Ticket, String> findTickets(String searchTerm, String searchValue, String usersFileName, String ticketsFileName, String searchingUsersOrTickets) throws SearchException {
         if (Objects.isNull(searchTerm) || Objects.isNull(searchValue)) {
             throw new SearchException("searchTerm or searchValue or fileToSearchFrom is null");
         }
-        List<Object> foundItems = new ArrayList<>();
+        Map<Ticket, String> searchTicketsResponse = new HashMap<>();
+        List<Ticket> foundTickets;
+        Set<User> users;
+        Set<Ticket> tickets;
+        try {
+            String usersFileContent = readFile(usersFileName);
+            String ticketsFileContent = readFile(ticketsFileName);
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            Object convertedObject = convertSearchValue(searchTerm, searchValue);
+            Predicate<Ticket> ticketPredicate = ticket -> {
+                boolean testPassed = false;
+                try {
+                    Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, Ticket.class));
+                    if (Objects.equals(method.invoke(ticket), convertedObject) || (method.invoke(ticket) instanceof Collection && new ArrayList<>((Collection<?>)method.invoke(ticket)).contains(convertedObject) )) {
+                        testPassed = true;
+                    }
+                } catch (IntrospectionException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return testPassed;
+            };
+            users = objectMapper.readValue(usersFileContent, new TypeReference<HashSet<User>>() {
+            });
+            tickets = objectMapper.readValue(ticketsFileContent, new TypeReference<HashSet<Ticket>>() {
+            });
+            if (searchingUsersOrTickets.equals("tickets")) {
+                foundTickets = tickets.stream().filter(ticketPredicate).collect(Collectors.toList());
+                for (Ticket ticket: foundTickets) {
+                    for (User user: users) {
+                        if (Integer.parseInt(user.get_id()) == ticket.getAssignee_id()) {
+                                searchTicketsResponse.put(ticket, user.getName());
+                        }
+                    }
+                    // if the relationship was not found add blank assignee for this ticket
+                    if (!searchTicketsResponse.containsKey(ticket)) {
+                        searchTicketsResponse.put(ticket, "");
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return searchTicketsResponse;
+    }
+
+
+    public static Map<User, List<String>> findUsers(String searchTerm, String searchValue, String usersFileName, String ticketsFileName, String searchingUsersOrTickets) throws SearchException {
+        if (Objects.isNull(searchTerm) || Objects.isNull(searchValue)) {
+            throw new SearchException("searchTerm or searchValue or fileToSearchFrom is null");
+        }
+        Map<User, List<String>> searchUsersResponse = new HashMap<>();
+        List<User> foundUsers;
         Set<User> users;
         Set<Ticket> tickets;
         try {
@@ -138,30 +209,42 @@ public class Util {
             tickets = objectMapper.readValue(ticketsFileContent, new TypeReference<HashSet<Ticket>>() {
             });
             if (searchingUsersOrTickets.equals("users")) {
-                foundItems = users.stream().filter(userPredicate).collect(Collectors.toList());
-                List<User> xyz =foundItems.stream().map(User.class::cast).collect(Collectors.toList());
-                List<String> assignedTickets = tickets.stream()
-                        .filter(ticket -> xyz.stream().anyMatch(user -> Integer.parseInt(user.get_id()) == ticket.getAssignee_id()))
-                        .map(ticket -> ticket.getSubject())
-                        .collect(Collectors.toList());
-                System.out.println(assignedTickets);
-            } else if (searchingUsersOrTickets.equals("tickets")) {
-                foundItems = tickets.stream().filter(ticketPredicate).collect(Collectors.toList());
-                List<Ticket> xyz =foundItems.stream().map(Ticket.class::cast).collect(Collectors.toList());
-                String assignedUser = users.stream()
-                        .filter(user -> xyz.stream().anyMatch(ticket -> Integer.parseInt(user.get_id()) == ticket.getAssignee_id()))
-                        .map(user -> user.getName())
-                        .reduce("", (partialString, element) -> partialString + element);
-                System.out.println(assignedUser);
-
+                foundUsers = users.stream().filter(userPredicate).collect(Collectors.toList());
+                for (User user: foundUsers) {
+                    for (Ticket ticket: tickets) {
+                        if (Integer.parseInt(user.get_id()) == ticket.getAssignee_id()) {
+                            if (searchUsersResponse.containsKey(user)) {
+                                searchUsersResponse.get(user).add(ticket.getSubject());
+                            } else {
+                                List<String> ticketSubjects = new ArrayList<>();
+                                ticketSubjects.add(ticket.getSubject());
+                                searchUsersResponse.put(user, ticketSubjects);
+                            }
+                        }
+                    }
+                    // if the relationship was not found add an empty list of tickets for this user
+                    if (!searchUsersResponse.containsKey(user)) {
+                        searchUsersResponse.put(user, Collections.emptyList());
+                    }
+                }
             }
+//            else if (searchingUsersOrTickets.equals("tickets")) {
+//                foundItems = tickets.stream().filter(ticketPredicate).collect(Collectors.toList());
+//                List<Ticket> xyz =foundItems.stream().map(Ticket.class::cast).collect(Collectors.toList());
+//                String assignedUser = users.stream()
+//                        .filter(user -> xyz.stream().anyMatch(ticket -> Integer.parseInt(user.get_id()) == ticket.getAssignee_id()))
+//                        .map(user -> user.getName())
+//                        .reduce("", (partialString, element) -> partialString + element);
+//                System.out.println(assignedUser);
+//
+//            }
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return foundItems;
+        return searchUsersResponse;
     }
 
     private static Object convertSearchValue(String searchTerm, String searchValue) throws SearchException {
