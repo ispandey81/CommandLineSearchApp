@@ -21,6 +21,11 @@ public class FileUtil {
         throw new IllegalStateException("Utility class");
     }
 
+    /**
+     * @param fileName
+     * @return the contents of the file as a string
+     * @throws IOException
+     */
     public static String readFile(String fileName) throws IOException
     {
         String result = null;
@@ -37,6 +42,11 @@ public class FileUtil {
         return result;
     }
 
+    /**
+     * @param usersFileName
+     * @param ticketsFileName
+     * @return the Pair object containing a collection of users and tickets
+     */
     public static Pair convertJsonToPojo(String usersFileName, String ticketsFileName) {
         Set<User> users;
         Set<Ticket> tickets;

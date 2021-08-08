@@ -20,6 +20,13 @@ public class SearchUtil {
         throw new IllegalStateException("Utility class");
     }
 
+    /** Responsible for calling search methods and displaying the result
+     * @param scanner
+     * @param userInput
+     * @param usersFileName
+     * @param ticketsFileName
+     * @param searchingUsersOrTickets
+     */
     public static void search(Scanner scanner, String userInput, String usersFileName, String ticketsFileName, String searchingUsersOrTickets) {
         try {
             System.out.println("Enter search term");
@@ -36,7 +43,7 @@ public class SearchUtil {
             String searchValue = userInput;
             System.out.printf("Searching %s for '%s' with a value of '%s' %n", searchingUsersOrTickets, searchTerm, searchValue);
             
-            if (searchingUsersOrTickets.equals("users")) {
+            if (searchingUsersOrTickets.equals(CommonUtil.USER_SEARCH)) {
                 Map<User, List<String>> usersResponseList = findUsers(searchTerm, searchValue, usersFileName, ticketsFileName);
                 if (usersResponseList.isEmpty()) {
                     System.out.println("No results found");
@@ -46,7 +53,7 @@ public class SearchUtil {
                         System.out.printf(entry.getKey() + "tickets = " + entry.getValue() + "%n");
                     }
                 }
-            } else if(searchingUsersOrTickets.equals("tickets")) {
+            } else if(searchingUsersOrTickets.equals(CommonUtil.TICKET_SEARCH)) {
                 Map<Ticket, String> ticketsResponseList = findTickets(searchTerm, searchValue, usersFileName, ticketsFileName);
                 if (ticketsResponseList.isEmpty()) {
                     System.out.println("No results found");
@@ -65,9 +72,17 @@ public class SearchUtil {
 
     }
 
+    /**
+     * @param searchTerm
+     * @param searchValue
+     * @param usersFileName
+     * @param ticketsFileName
+     * @return a map containing Ticket object as key and assignee_name as value
+     * @throws SearchException
+     */
     public static Map<Ticket, String> findTickets(String searchTerm, String searchValue, String usersFileName, String ticketsFileName) throws SearchException {
-        if (Objects.isNull(searchTerm) || Objects.isNull(searchValue)) {
-            throw new SearchException("searchTerm or searchValue or fileToSearchFrom is null");
+        if (Objects.isNull(searchTerm) || Objects.isNull(searchValue) || Objects.isNull(usersFileName) || Objects.isNull(ticketsFileName)) {
+            throw new SearchException("searchTerm or searchValue or usersFileName is null or ticketsFileName is null");
         }
         Map<Ticket, String> searchTicketsResponse = new HashMap<>();
         List<Ticket> foundTickets;
@@ -112,9 +127,17 @@ public class SearchUtil {
     }
 
 
+    /**
+     * @param searchTerm
+     * @param searchValue
+     * @param usersFileName
+     * @param ticketsFileName
+     * @return a map containing User object as key and a list of assigned ticket subjects as value
+     * @throws SearchException
+     */
     public static Map<User, List<String>> findUsers(String searchTerm, String searchValue, String usersFileName, String ticketsFileName) throws SearchException {
-        if (Objects.isNull(searchTerm) || Objects.isNull(searchValue)) {
-            throw new SearchException("searchTerm or searchValue or fileToSearchFrom is null");
+        if (Objects.isNull(searchTerm) || Objects.isNull(searchValue) || Objects.isNull(usersFileName) || Objects.isNull(ticketsFileName)) {
+            throw new SearchException("searchTerm or searchValue or usersFileName is null or ticketsFileName is null");
         }
         Map<User, List<String>> searchUsersResponse = new HashMap<>();
         List<User> foundUsers;

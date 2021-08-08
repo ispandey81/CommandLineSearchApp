@@ -15,6 +15,10 @@ public class CommonUtil {
 
     private static final String TERMINATE_PROGRAM_KEYWORD = "quit";
 
+    public static final String USER_SEARCH = "users";
+
+    public static final String TICKET_SEARCH = "tickets";
+
     public static boolean quitToExit(String inputToCheck) {
         return inputToCheck.equals(TERMINATE_PROGRAM_KEYWORD);
     }
@@ -23,6 +27,12 @@ public class CommonUtil {
         System.out.printf(text);
     }
 
+    /**
+     * @param searchTerm
+     * @param searchValue
+     * @return a search value object converted based on the specified search term
+     * @throws SearchException
+     */
     public static Object convertSearchValue(String searchTerm, String searchValue) throws SearchException {
         if(Objects.isNull(searchTerm) || Objects.isNull(searchValue)) {
             throw new SearchException("searchTerm or searchValue is null");

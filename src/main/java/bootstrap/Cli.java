@@ -12,8 +12,6 @@ public class Cli {
     private static final String TICKETS_FILE_NAME = "data/tickets.json";
     private static final String DISPLAY_AVAILABLE_SELECTIONS = "Select 1) Users or 2) Tickets";
     private static final String INVALID_SEARCH_OPTION = "Invalid search option";
-    private static final String USER_SEARCH = "users";
-    private static final String TICKET_SEARCH = "tickets";
 
     public static void main(String[] args) {
         try {
@@ -28,9 +26,10 @@ public class Cli {
                         userInput = scanner.nextLine();
                         if (!CommonUtil.quitToExit(userInput) && userInput.equals("1")) {
                             // We are in user search
-                            SearchUtil.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, USER_SEARCH);
+                            SearchUtil.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, CommonUtil.USER_SEARCH);
                         } else if(!CommonUtil.quitToExit(userInput) && userInput.equals("2")) {
-                            SearchUtil.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, TICKET_SEARCH);
+                            // We are in ticket search
+                            SearchUtil.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, CommonUtil.TICKET_SEARCH);
                         } else if (userInput.equals("")) {
                             //DO NOTHING
                         } else if(CommonUtil.quitToExit(userInput)) {
