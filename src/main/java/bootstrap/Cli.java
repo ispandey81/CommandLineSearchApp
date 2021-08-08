@@ -1,6 +1,7 @@
 package bootstrap;
 
-import utils.Util;
+import utils.CommonUtil;
+import utils.SearchUtil;
 
 import java.util.Scanner;
 
@@ -17,42 +18,42 @@ public class Cli {
     public static void main(String[] args) {
         try {
             Scanner scanner = new Scanner(System.in);
-            Util.printFormattedText(SEARCH_OPTIONS);
+            CommonUtil.printFormattedText(SEARCH_OPTIONS);
             String userInput = scanner.nextLine();
-            while (!Util.quitToExit(userInput)) {
+            while (!CommonUtil.quitToExit(userInput)) {
                 userInput = scanner.nextLine();
                 if (userInput.equals("1") || userInput.equals("2") || userInput.equals("")) {
-                    if (!Util.quitToExit(userInput) && userInput.equals("1")) {
+                    if (!CommonUtil.quitToExit(userInput) && userInput.equals("1")) {
                         System.out.println(DISPLAY_AVAILABLE_SELECTIONS);
                         userInput = scanner.nextLine();
-                        if (!Util.quitToExit(userInput) && userInput.equals("1")) {
+                        if (!CommonUtil.quitToExit(userInput) && userInput.equals("1")) {
                             // We are in user search
-                            Util.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, USER_SEARCH);
-                        } else if(!Util.quitToExit(userInput) && userInput.equals("2")) {
-                            Util.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, TICKET_SEARCH);
+                            SearchUtil.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, USER_SEARCH);
+                        } else if(!CommonUtil.quitToExit(userInput) && userInput.equals("2")) {
+                            SearchUtil.search(scanner, userInput, USERS_FILE_NAME, TICKETS_FILE_NAME, TICKET_SEARCH);
                         } else if (userInput.equals("")) {
                             //DO NOTHING
-                        } else if(Util.quitToExit(userInput)) {
+                        } else if(CommonUtil.quitToExit(userInput)) {
                             System.exit(0);
                         } else {
                             System.out.println(INVALID_SEARCH_OPTION);
-                            Util.printFormattedText(SEARCH_OPTIONS);
+                            CommonUtil.printFormattedText(SEARCH_OPTIONS);
                         }
                     } else if (userInput.equals("2")) {
-                        Util.printFormattedText(SEARCHABLE_FIELDS);
+                        CommonUtil.printFormattedText(SEARCHABLE_FIELDS);
                     } else if (userInput.equals("")) {
                         //DO NOTHING
                     }
-                } else if(Util.quitToExit(userInput)) {
+                } else if(CommonUtil.quitToExit(userInput)) {
                     System.exit(0);
                 } else {
                     System.out.println(INVALID_SEARCH_OPTION);
-                    Util.printFormattedText(SEARCH_OPTIONS);
+                    CommonUtil.printFormattedText(SEARCH_OPTIONS);
                 }
 
             }
         } catch (Exception e) {
-            Util.printFormattedText(SEARCH_OPTIONS);
+            CommonUtil.printFormattedText(SEARCH_OPTIONS);
             e.printStackTrace();
         }
 
