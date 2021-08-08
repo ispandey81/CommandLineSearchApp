@@ -87,11 +87,11 @@ public class Ticket {
 
     @Override
     public String toString() {
-        return  "===============================================\n_id = " + _id +
-                "\ncreated_at = " + created_at +
-                "\ntype = " + type +
-                "\nsubject = " + subject +
-                "\nassignee_id = " + assignee_id +
-                "\ntags = " + tags + "\n";
+        return  "===============================================%n_id = " + _id +
+                "%ncreated_at = " + created_at +
+                "%ntype = " + type +
+                "%nsubject = " + subject +
+                "%nassignee_id = " + assignee_id +
+                "%ntags = " + tags + "%n";
     }
 }
