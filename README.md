@@ -46,6 +46,6 @@
     - To execute the CommandLineSearchApp-1.0-SNAPSHOT-jar-with-dependencies.jar file change directory
       to target folder and execute - 
       
-      java -cp .\CommandLineSearchApp-1.0-SNAPSHOT-jar-with-dependencies.jar bootstrap.Cli
+      java -cp CommandLineSearchApp-1.0-SNAPSHOT-jar-with-dependencies.jar bootstrap.Cli
 
     - Type quit at any time to quit the program
