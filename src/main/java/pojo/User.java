@@ -7,12 +7,12 @@ public class User {
     private String _id;
     private String name;
     private Date created_at;
-    private boolean verified;
+    private Boolean verified;
 
     public User() {
     }
 
-    public User(String _id, String name, Date created_at, boolean verified) {
+    public User(String _id, String name, Date created_at, Boolean verified) {
         this._id = _id;
         this.name = name;
         this.created_at = created_at;
@@ -43,11 +43,11 @@ public class User {
         this.created_at = created_at;
     }
 
-    public boolean isVerified() {
+    public Boolean getVerified() {
         return verified;
     }
 
-    public void setVerified(boolean verified) {
+    public void setVerified(Boolean verified) {
         this.verified = verified;
     }
 

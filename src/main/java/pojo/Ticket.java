@@ -9,13 +9,13 @@ public class Ticket {
     private Date created_at;
     private String type;
     private String subject;
-    private int assignee_id;
+    private Integer assignee_id;
     private List<String> tags;
 
     public Ticket() {
     }
 
-    public Ticket(String _id, Date created_at, String type, String subject, int assignee_id, List<String> tags) {
+    public Ticket(String _id, Date created_at, String type, String subject, Integer assignee_id, List<String> tags) {
         this._id = _id;
         this.created_at = created_at;
         this.type = type;
@@ -56,11 +56,11 @@ public class Ticket {
         this.subject = subject;
     }
 
-    public int getAssignee_id() {
+    public Integer getAssignee_id() {
         return assignee_id;
     }
 
-    public void setAssignee_id(int assignee_id) {
+    public void setAssignee_id(Integer assignee_id) {
         this.assignee_id = assignee_id;
     }
 

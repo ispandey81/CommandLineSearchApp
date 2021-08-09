@@ -117,7 +117,7 @@ public class SearchUtil {
             foundTickets = pair.getTickets().stream().filter(ticketPredicate).collect(Collectors.toList());
             for (Ticket ticket: foundTickets) {
                 for (User user: pair.getUsers()) {
-                    if (Integer.parseInt(user.get_id()) == ticket.getAssignee_id()) {
+                    if (!Objects.isNull(ticket.getAssignee_id()) && Integer.parseInt(user.get_id()) == ticket.getAssignee_id()) {
                         searchTicketsResponse.put(ticket, user.getName());
                     }
                 }
@@ -155,7 +155,7 @@ public class SearchUtil {
                 boolean testPassed = false;
                 try {
                     Method method = PropertyUtils.getReadMethod(new PropertyDescriptor(searchTerm, User.class));
-                    if (method.invoke(user) != null && method.invoke(user).equals(convertedObject)) {
+                    if (Objects.equals(method.invoke(user), convertedObject)) {
                         testPassed = true;
                     }
                 } catch (IntrospectionException e) {
@@ -172,7 +172,7 @@ public class SearchUtil {
             foundUsers = pair.getUsers().stream().filter(userPredicate).collect(Collectors.toList());
             for (User user: foundUsers) {
                 for (Ticket ticket: pair.getTickets()) {
-                    if (Integer.parseInt(user.get_id()) == ticket.getAssignee_id()) {
+                    if (!Objects.isNull(ticket.getAssignee_id()) && Integer.parseInt(user.get_id()) == ticket.getAssignee_id()) {
                         if (searchUsersResponse.containsKey(user)) {
                             searchUsersResponse.get(user).add(ticket.getSubject());
                         } else {

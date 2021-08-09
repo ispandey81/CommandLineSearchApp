@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class CommonUtilTest {
 
     @Test
-    @DisplayName("Test SearchException is thrown")
+    @DisplayName("Test SearchException is thrown in convertSearchValue function")
     void testConvertSearchValueException() {
         assertThrows(SearchException.class, () -> CommonUtil.convertSearchValue(null, "test"));
     }
