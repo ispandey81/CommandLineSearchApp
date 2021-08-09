@@ -14,13 +14,13 @@ public class CommonUtilTest {
 
     @Test
     @DisplayName("Test SearchException is thrown in convertSearchValue function")
-    void testConvertSearchValueException() {
+    public void testConvertSearchValueException() {
         assertThrows(SearchException.class, () -> CommonUtil.convertSearchValue(null, "test"));
     }
 
     @Test
     @DisplayName("Test convertSearchValue function")
-    void testConvertSearchValue() throws SearchException {
+    public void testConvertSearchValue() throws SearchException {
         assertAll("Test conversion of search values",
                 () -> assertEquals(null, CommonUtil.convertSearchValue("type", "null")),
                 () -> assertEquals(15, CommonUtil.convertSearchValue("assignee_id", "15")),

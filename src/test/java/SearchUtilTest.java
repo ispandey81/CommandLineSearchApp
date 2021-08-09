@@ -19,7 +19,7 @@ public class SearchUtilTest {
 
     @Test
     @DisplayName("Test findTickets function")
-    void testFindTickets() throws SearchException, ParseException {
+    public void testFindTickets() throws SearchException, ParseException {
         Map<Ticket, String> foundTickets = SearchUtil.findTickets("assignee_id", "71", USERS_FILE_NAME, TICKETS_FILE_NAME);
         Ticket expectedTicket = new Ticket("8ea53283-5b36-4328-9a78-f261ee90f44b",
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2016-03-07T03:00:54-11:00"),
@@ -32,7 +32,7 @@ public class SearchUtilTest {
 
     @Test
     @DisplayName("Test findTickets function for missing value search")
-    void testFindTicketsForMissingValueSearch() throws SearchException, ParseException {
+    public void testFindTicketsForMissingValueSearch() throws SearchException, ParseException {
         // Checking missing assignee_id
         Map<Ticket, String> foundTicketsMissingAssignee = SearchUtil.findTickets("assignee_id", "null", USERS_FILE_NAME, TICKETS_FILE_NAME);
         // Checking missing type
@@ -54,7 +54,7 @@ public class SearchUtilTest {
 
     @Test
     @DisplayName("Test findUsers function")
-    void testFindUsers() throws SearchException, ParseException {
+    public void testFindUsers() throws SearchException, ParseException {
         Map<User, List<String>> foundUsers= SearchUtil.findUsers("_id", "71", USERS_FILE_NAME, TICKETS_FILE_NAME);
         User expectedUser = new User("71", "Prince Hinton", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2016-04-18T11:05:43-10:00"), false);
         assertAll("Querying the found users",
@@ -65,7 +65,7 @@ public class SearchUtilTest {
 
     @Test
     @DisplayName("Test findUsers function for missing value search")
-    void testFindUsersForMissingValueSearch() throws SearchException, ParseException {
+    public void testFindUsersForMissingValueSearch() throws SearchException, ParseException {
         // Checking missing verified property
         Map<User, List<String>> foundUsers= SearchUtil.findUsers("verified", "null", USERS_FILE_NAME, TICKETS_FILE_NAME);
         User expectedUser = new User("54", "Spence Tate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").parse("2016-01-03T02:38:58-11:00"), null);

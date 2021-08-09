@@ -8,14 +8,14 @@ import utils.FileUtil;
 
 import java.io.IOException;
 
-class FileUtilTest {
+public class FileUtilTest {
 
     private static final String USERS_FILE_NAME = "data/users.json";
     private static final String TICKETS_FILE_NAME = "data/tickets.json";
 
     @Test
     @DisplayName("Read contents of a file as a string")
-    void testReadFile() throws IOException {
+    public void testReadFile() throws IOException {
         String expectedString = "{\n" +
                 "  \"fruit\": \"Apple\",\n" +
                 "  \"size\": \"Large\",\n" +
@@ -26,7 +26,7 @@ class FileUtilTest {
 
     @Test
     @DisplayName("Test conversion of json to pojo")
-    void testConvertJsonToPojo() {
+    public void testConvertJsonToPojo() {
         Pair pair = FileUtil.convertJsonToPojo(USERS_FILE_NAME, TICKETS_FILE_NAME);
         assertAll("Querying Pair object",
                 () -> assertNotNull(pair),
