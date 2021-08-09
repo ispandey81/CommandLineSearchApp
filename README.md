@@ -29,6 +29,9 @@
       Enter search value
       
       Ohio
+      
+    - Date search assumes that the date provided is in ISO 8601 Time zone format otherwise
+      an exception will be thrown e.g. 2016-07-28T05:29:25-10:00
 
 - Instructions to run the program
     - Make sure you have java 11 and maven installed on your machine
